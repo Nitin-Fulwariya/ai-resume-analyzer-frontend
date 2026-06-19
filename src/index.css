@@ -1,23 +1,112 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "Geist Sans", "Inter", sans-serif;
-  --color-brand-50: #eef2ff;
-  --color-brand-500: #6366f1;
-  --color-brand-600: #4f46e5;
-  --color-bg-base: #09090b; /* Zinc 950 */
-  --color-bg-panel: #18181b; /* Zinc 900 */
-  --color-border-subtle: #27272a; /* Zinc 800 */
+  --font-sans: "Geist Sans", system-ui, -apple-system, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", "JetBrains Mono", "Geist Mono", monospace;
+
+  /* Warm tinted neutrals (OKLCH — perceptually uniform, never pure gray/black) */
+  --color-ink-950: oklch(0.155 0.006 75);
+  --color-ink-900: oklch(0.190 0.006 75);
+  --color-ink-850: oklch(0.225 0.007 75);
+  --color-ink-800: oklch(0.275 0.008 75);
+  --color-ink-700: oklch(0.380 0.008 75);
+  --color-ink-600: oklch(0.500 0.007 75);
+  --color-ink-500: oklch(0.620 0.006 75);
+  --color-ink-400: oklch(0.720 0.005 75);
+  --color-ink-300: oklch(0.820 0.004 75);
+  --color-ink-100: oklch(0.960 0.004 90);
+
+  /* Accent — high-voltage signal lime (the singular 10% accent) */
+  --color-signal: oklch(0.890 0.196 122);
+  --color-signal-dim: oklch(0.760 0.170 122);
+  --color-signal-deep: oklch(0.600 0.140 122);
+
+  /* Semantics (desaturated to sit beside neutrals) */
+  --color-rose-soft: oklch(0.720 0.150 18);
+  --color-amber-soft: oklch(0.820 0.135 78);
+
+  /* Custom easing — built-in CSS curves are too weak */
+  --ease-out-strong: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out-strong: cubic-bezier(0.77, 0, 0.175, 1);
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  background-color: var(--color-bg-base);
-  color: #fafafa;
+  background-color: var(--color-ink-950);
+  color: var(--color-ink-100);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
 ::selection {
-  background-color: var(--color-brand-500);
-  color: white;
+  background-color: var(--color-signal);
+  color: var(--color-ink-950);
+}
+
+/* Tabular numerals for diagnostic figures */
+.tnum {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+
+/* Fine film grain — fixed overlay only, never on scroll containers */
+.grain::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Aurora drift behind the hero */
+@keyframes drift {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(4%, -3%, 0) scale(1.08); }
+}
+.aurora {
+  animation: drift 18s var(--ease-in-out-strong) infinite;
+}
+
+/* Shimmer for skeleton loaders */
+@keyframes shimmer {
+  100% { transform: translateX(100%); }
+}
+.shimmer {
+  position: relative;
+  overflow: hidden;
+}
+.shimmer::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in oklch, var(--color-ink-100) 7%, transparent),
+    transparent
+  );
+  animation: shimmer 1.4s var(--ease-out-strong) infinite;
+}
+
+/* Radial sweep for the score ring */
+@keyframes spin-slow {
+  to { transform: rotate(360deg); }
+}
+.spin-slow { animation: spin-slow 8s linear infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .aurora { animation: none; }
 }
